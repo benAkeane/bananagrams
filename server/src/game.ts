@@ -1,6 +1,6 @@
-import TilePool from './tilePool';
-import Player from './player';
-import dictionary from './dictionary';
+import TilePool from './tilepool.js';
+import Player from './player.js';
+import { isWordValid } from './dictionary.js';
 
 export type PublicPlayer = {
     id: string;
@@ -39,21 +39,24 @@ export default class Game {
         return count <= 4 ? 14 : 10;
     }
 
-    playWord(playerId: string, word: string): PlayResult {
+    async playWord(playerId: string, word: string): Promise<PlayResult> {
         const player = this.players[playerId];
-        if (!player) return { success: false, reason: 'player_not_found' };
-        
+        if (!player) {
+            return { success: false, reason: 'player_not_found' };
+        }
+
         const word_upper = word.toUpperCase();
 
         // check if word is in dictionary
-        if (!dictionary.has(word_upper)) {
+        const valid = await isWordValid(word_upper);
+        if (!valid) {
             return { success: false, reason: 'invalid_word' };
         }
 
         // count needed tiles for a word
         const needed: Record<string, number> = {};
         for (const character of word_upper) {
-            needed[character] = (needed[character] || 0) + 1;
+            needed[character!] = (needed[character!] || 0) + 1;
         }
 
         // count players rack tiles
@@ -65,7 +68,7 @@ export default class Game {
 
         // make sure player has enough tiles
         for (const character in needed) {
-            if ((rackCount[character] || 0) < needed[character]) {
+            if ((rackCount[character] || 0) < needed[character]!) {
                 return { success: false, reason: 'not_enough_tiles' };
             }
         }
@@ -89,7 +92,7 @@ export default class Game {
             const player = this.players[pid];
             const tile = this.pool.draw(1);
             if (tile.length > 0) {
-                player.addTiles(tile);
+                player!.addTiles(tile);
             }
         }
     }

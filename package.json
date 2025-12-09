@@ -1,9 +1,17 @@
 {
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^24.10.2"
+    "@types/node": "^24.10.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
+    "node-fetch": "^3.3.2",
     "socket.io": "^4.8.1"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "ts-node --loader ts-node/esm tests/testGame.ts"
   }
 }

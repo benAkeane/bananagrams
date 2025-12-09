@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "rootDir": "server/src",
+    "outDir": "dist",
+    "module": "nodenext",
+    "target": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["src/**/*.ts", "server/src/tests/**/*.ts"]
+}

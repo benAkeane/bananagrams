@@ -1,7 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import Game from './game';
+import Game from './game.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -26,8 +26,8 @@ io.on('connection', (socket) => {
     });
 
     // play word event
-    socket.on('playWord', ({ word }: { word: string }) => {
-        const result = game.playWord(socket.id, word);
+    socket.on('playWord', async ({ word }: { word: string }) => {
+        const result = await game.playWord(socket.id, word);
         // send the result to the player who played the word
         socket.emit('playResult', result);
         io.emit('state', game.getPublicState());
