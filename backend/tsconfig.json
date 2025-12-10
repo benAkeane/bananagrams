@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": "server/src",
+    "rootDir": "src",
     "outDir": "dist",
     "module": "nodenext",
     "target": "esnext",
@@ -13,5 +13,6 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["src/**/*.ts", "server/src/tests/**/*.ts"]
+  "include": ["src/**/*"],
+  "exclude": ["dist"]
 }

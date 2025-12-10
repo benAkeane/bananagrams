@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import dotenv from 'dotenv'
+import * as dotenv from 'dotenv'
 dotenv.config();
 
 const API_KEY = process.env.MW_API_KEY!;
