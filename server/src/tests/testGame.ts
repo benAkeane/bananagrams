@@ -9,7 +9,7 @@ async function test() {
 
     // test valid word
     const result1 = await game.playWord('player1', 'apple');
-    console.log('Playering "apple":', result1);
+    console.log('Playing "apple":', result1);
 
     // test invalid word
     const result2 = await game.playWord('player1', 'dasjdnajsd');
@@ -19,7 +19,13 @@ async function test() {
     const result3 = await game.playWord('player1', 'apple');
     console.log('Playing "apple":', result3);
 
-    console.log('Player rack after plays:', game.players['player1']!.rack);
+    // test peel (adds 1 tile to rack)
+    const result4 = await game.peel();
+    console.log('Player rack after peel:', game.players['player1']!.rack)
+
+    // test dump after peel (removes peeled tile, replaces with three new tiles)
+    const result5 = await game.dump('player1', game.players['player1']!.rack[0])
+    console.log('Player rack after dump:', game.players['player1']!.rack);
 }
 
 test();
