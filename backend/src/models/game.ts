@@ -1,6 +1,6 @@
 import TilePool from './tilepool.js';
 import Player from './player.js';
-import { isWordValid } from './dictionary.js';
+import { isWordValid } from '../services/dictionary.js';
 
 export type PublicPlayer = {
     id: string;

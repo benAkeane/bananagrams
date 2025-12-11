@@ -1,4 +1,4 @@
-import Game from '../game.js';
+import Game from '../models/game.js';
 
 async function test() {
     const game = new Game();
