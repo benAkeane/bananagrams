@@ -1,100 +1,89 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Box, Button, TextField, Typography, Paper, Stack, Link } from '@mui/material';
+import { useNavigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Loggin in with:', email, password);
-
-        // TODO: send login request to backend
-    };
-
+    const navigate = useNavigate();
+    
     return (
-        <div style={styles.container}>
-            <div style={styles.card}>
-                <h1 style={styles.title}>Log In</h1>
+        <Box 
+            sx= {{
+                minHeight: '100vh',
+                display: 'flex',
+                //flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                bgcolor: '#fff8bd',
+                //fontFamily: '"JetBrains Mono", monospace',
+            }}
+        >
 
-                <form onSubmit={handleLogin} style={styles.form}>
-                    <input
+            <Paper
+                elevation={6}
+                sx={{
+                    p: 4,
+                    borderRadius: '20px',
+                    width: '100%',
+                    maxWidth: 400,
+                    textAlign: 'center',
+                }}
+            >
+                <Typography 
+                    variant='h4' 
+                    sx={{ mb: 3, fontFamily: '"JetBrains Mono", monospace' }}
+                >
+                    Log In
+                </Typography>
+
+                <Stack spacing={2}>
+                    <TextField
+                        label='Email'
                         type='email'
-                        placeholder='Email'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={styles.input}
-                        required
+                        fullWidth
                     />
-
-                    <input
+                    <TextField
+                        label='Password'
                         type='password'
-                        placeholder='Password'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={styles.input}
-                        required
+                        fullWidth
                     />
 
-                    <button type='submit' style={styles.button}>
+                    <Button
+                        variant='contained'
+                        sx={{
+                            mt: 2,
+                            bgcolor: '#362023',
+                            color: '#fff',
+                            fontFamily: '"JetBrains Mono", monospace',
+                            fontWeight: 'bold',
+                            borderRadius: '10px',
+                            '&:hover': { bgcolor: '#4a2d30' },
+                        }}
+                    >
                         Log In
-                    </button>
-                </form>
-
-                <p style={styles.text}>
-                    Don't have an account?
-                    <a href='/signup' style={styles.link}>Sign Up</a>
-                </p>
-            </div>
-        </div>
+                    </Button>
+                </Stack>
+                <Typography 
+                    sx={{
+                        mt: 3,
+                        fontFamily: '"JetBrains Mono", monospace',
+                    }}
+                >
+                    Not registered? {" "}
+                    <Link
+                        component='button'
+                        underline='hover'
+                        sx={{
+                            fontWeight: 'bold',
+                            cursor: 'pointer'
+                        }}
+                        onClick={() => navigate('/signup')}
+                    >
+                        Sign up
+                    </Link>
+                </Typography>
+            </Paper>
+        </Box>
     );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-    container: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#fff8bd',
-        fontFamily: '"JetBrains Mono", monospace',
-    },
-    card: {
-        backgroundColor: '#fff',
-        padding: '30px',
-        borderRadius: '16px',
-        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-        width: '350px',
-        textAlign: 'center',
-    },
-    title: {
-        marginBottom: '30px',
-        color: '#362023'
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px',
-    },
-    button: {
-        padding: '12px',
-        backgroundColor: '#362023',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '16px',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-    },
-    text: {
-        marginTop: '15px',
-        fontSize: '14px',
-    },
-    link: {
-        color: '#362023',
-        textDecoration: 'underline',
-        marginLeft: '5px',
-        cursor: 'pointer',
-    },
 };
 
 export default LoginPage;
