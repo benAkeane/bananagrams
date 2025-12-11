@@ -1,9 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png'
 
 const LandingPage: React.FC = () => {
+    const navigate = useNavigate();
+
     const handleLogin = () => {
-        // TODO: add login logic
-        console.log('Login button clicked');
+        navigate('/login');
     };
 
     const handleSignUp = () => {
@@ -14,7 +17,7 @@ const LandingPage: React.FC = () => {
     return (
         <div style={styles.container}>
             <h1>Bananagrams</h1>
-            <img src='/logo.png' alt='Bananagrams Logo' style={styles.logo} />
+            <img src={logo} alt='Bananagrams Logo' style={styles.logo} />
             <div style={styles.buttons}>
                 <button style={styles.button} onClick={handleLogin}>Log In</button>
                 <button style={styles.button} onClick={handleSignUp}>Sign Up</button>
