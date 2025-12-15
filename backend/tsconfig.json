@@ -3,16 +3,15 @@
     "rootDir": "src",
     "outDir": "dist",
     "module": "nodenext",
-    "target": "esnext",
+    "moduleResolution": "nodenext",
+    "target": "es2022",
     "strict": true,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
 }

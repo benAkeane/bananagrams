@@ -3,9 +3,16 @@ import type { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../db.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+
+if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET not set');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 interface SignupBody {
     username: string;
@@ -18,11 +25,14 @@ interface LoginBody {
     password: string;
 }
 
-// Sign up
+// POST auth/signup
 router.post("/signup", async(req: Request<{}, {}, SignupBody>, res: Response) => {
     const { username, email, password } = req.body;
 
     try {
+        if (!username || !email || !password) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const result = await pool.query(
@@ -45,7 +55,7 @@ router.post("/signup", async(req: Request<{}, {}, SignupBody>, res: Response) =>
     }
 });
 
-// Login
+// POST /auth/login
 router.post('/login', async(req: Request<{}, {}, LoginBody>, res: Response) => {
     const { email, password } = req.body;
     try {

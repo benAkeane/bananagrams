@@ -1,9 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Stack, Link } from '@mui/material';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useResolvedPath } from "react-router-dom";
 
 const SignUpPage: React.FC = () => {
     const navigate = useNavigate();
+
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const handleSignUp = async () => {
+        setError("");
+        console.log("CLICKED");
+
+        try {
+            const res = await fetch('http://localhost:3000/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || 'Sign up failed');
+                return;
+            }
+
+            localStorage.setItem('token', data.token);
+
+            navigate('/home');
+        } catch {
+            setError('Server error');
+        }
+    };
     
     return (
         <Box 
@@ -38,17 +71,29 @@ const SignUpPage: React.FC = () => {
                         label="Username"
                         type='username'
                         fullWidth
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                     />
                     <TextField
                         label='Email'
                         type='email'
                         fullWidth
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <TextField
                         label='Password'
                         type='password'
                         fullWidth
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
+
+                    {error && (
+                        <Typography color='error' fontSize='0.9rem'>
+                            {error}
+                        </Typography>
+                    )}
 
                     <Button
                         variant='contained'
@@ -61,6 +106,7 @@ const SignUpPage: React.FC = () => {
                             borderRadius: '10px',
                             '&:hover': { bgcolor: '#4a2d30' },
                         }}
+                        onClick={handleSignUp}
                     >
                         Sign Up
                     </Button>
