@@ -108,8 +108,10 @@ export default class Game {
             const [x, y] = pos.split(',').map(Number);
 
             // horizontal
+            let startX = x;
+            while (board[`${startX - 1},${y}`]) startX--;
             let hWord = '';
-            let hx = x;
+            let hx = startX;
             while (board[`${hx},${y}`]) {
                 hWord += board[`${hx},${y}`];
                 hx++;
@@ -117,10 +119,10 @@ export default class Game {
             if (hWord.length > 1) words.push(hWord);
 
             // vertical
+            let startY = y;
+            while (board[`${x},${startY - 1}`]) startY--;
             let vWord = '';
-            let vy = y;
-            while (board[`${x},${vy}`]) vy--;
-            vy++;
+            let vy = startY;
             while (board[`${x},${vy}`]) {
                 vWord += board[`${x},${vy}`];
                 vy++;
