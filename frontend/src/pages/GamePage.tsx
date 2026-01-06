@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { socket } from '../socket';
 import { Box, Button, Typography, Stack } from '@mui/material';
 
 type PlayerState = {
@@ -18,7 +18,6 @@ type TilePlacement = { letter: string; x: number; y: number };
 const BOARD_SIZE = 15;
 
 const GamePage: React.FC = () => {
-    const [socket, setSocket] = useState<Socket | null>(null);
     const [state, setState] = useState<PublicState>({ players: [], poolSize: 0 });
     const [rack, setRack] = useState<string[]>([]);
     const [placements, setPlacements] = useState<TilePlacement[]>([]);
@@ -26,29 +25,43 @@ const GamePage: React.FC = () => {
     const [username] = useState(localStorage.getItem('username') || 'Player');
     const [feedback, setFeedback] = useState<string>('');
 
-    useEffect(() => {
-        const s = io('http://localhost:3000');
-        setSocket(s);
+    useEffect(() => {;
+        if (!socket.connected) {
+            socket.connect();
+        }
+
         setRack(['A', 'P', 'P', 'L',' E']);
 
-        s.on('connect', () => {
-            console.log('Connected:', s.id);
-            s.emit('join', username);
+        socket.on('connect', () => {
+            console.log('Connected:', socket.id);
+            const username = localStorage.getItem('username') || 'Player';
+            socket.emit('join', username);
         });
 
-        s.on('state', (data: PublicState) => {
+        socket.on('state', (data: PublicState) => {
             setState(data);
         });
 
-        s.on('privateState', (data: { rack: string[]; board: Record<string, string> }) => {
+        socket.on('privateState', (data: { rack: string[]; board: Record<string, string> }) => {
             setRack(data.rack);
             setBoard(data.board);
         });
 
+        socket.on('playResult', (data: { success: boolean; reason?: string }) => {
+            if (!data.success && data.reason) {
+                setFeedback(data.reason);
+            } else {
+                setFeedback('');
+            }
+        });
+
         return () => {
-            s.disconnect();
+            socket.off('connect');
+            socket.off('state');
+            socket.off('privateState');
+            socket.off('playResult');
         };
-    }, [username]);
+    }, []);
 
     // drag handlers
     const handleDragStart = (letter: string, index: number) => (e: React.DragEvent<HTMLDivElement>) => {

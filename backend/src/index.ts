@@ -10,12 +10,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const FRONTEND_URL = 'http://localhost:3001';
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: '*' } });
+const io = new Server(httpServer, { 
+    cors: { 
+        origin: FRONTEND_URL,
+        methods: ['GET', 'POST'],
+        credentials: true, 
+    } 
+});
 
 app.use(cors({
-    origin: 'http://localhost:3001', // frontend url
+    origin: FRONTEND_URL,
     credentials: true,
 }));
 
