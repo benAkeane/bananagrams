@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Paper, Stack, Link } from '@mui/material';
-import { useNavigate, useResolvedPath } from "react-router-dom";
+import { Box, Button, TextField, Typography, Paper, Stack, Link, CircularProgress } from '@mui/material';
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage: React.FC = () => {
     const navigate = useNavigate();
@@ -13,7 +13,13 @@ const SignUpPage: React.FC = () => {
 
     const handleSignUp = async () => {
         setError("");
+        if (!username || !email || !password) {
+            setError('Please fill out all fields');
+            return;
+        }
+
         setLoading(true);
+
         try {
             const res = await fetch('http://localhost:3000/auth/signup', {
                 method: 'POST',
@@ -31,10 +37,15 @@ const SignUpPage: React.FC = () => {
                 return;
             }
 
+            // save JWT token and username to localstorage
             localStorage.setItem('token', data.token);
+            localStorage.setItem('username', data.username);
+
             navigate('/home');
-        } catch {
+        } catch (err) {
+            console.error(err);
             setError('Server error');
+        } finally {
             setLoading(false);
         }
     };
@@ -70,7 +81,7 @@ const SignUpPage: React.FC = () => {
                 <Stack spacing={2}>
                     <TextField
                         label="Username"
-                        type='username'
+                        type='text'
                         fullWidth
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
@@ -107,12 +118,14 @@ const SignUpPage: React.FC = () => {
                             borderRadius: '10px',
                             '&:hover': { bgcolor: '#4a2d30' },
                         }}
-                        disabled={loading}
                         onClick={handleSignUp}
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={20} /> : null}
                     >
-                        Sign Up
+                        {loading ? 'Signing Up...' : 'Sign Up'}
                     </Button>
                 </Stack>
+                
                 <Typography 
                     sx={{
                         mt: 3,

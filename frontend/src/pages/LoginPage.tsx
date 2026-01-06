@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Paper, Stack, Link } from '@mui/material';
+import { Box, Button, TextField, Typography, Paper, Stack, Link, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
@@ -12,13 +12,13 @@ const LoginPage: React.FC = () => {
 
     const handleLogin = async () => {
         setError('');
-        setLoading(true);
 
         if (!email || !password) {
             setError('All fields are required');
-            setLoading(false);
             return;
         }
+
+        setLoading(true);
 
         try {
             const res = await fetch('http://localhost:3000/auth/login', {
@@ -35,10 +35,17 @@ const LoginPage: React.FC = () => {
                 return;
             }
 
+            // save token and username to localStorage
             localStorage.setItem('token', data.token);
+            if (data.username) {
+                localStorage.setItem('username', data.username);
+            }
+
             navigate('/home');
-        } catch {
+        } catch (err) {
+            console.error(err);
             setError('Server error');
+        } finally {
             setLoading(false);
         }
     };
@@ -48,14 +55,11 @@ const LoginPage: React.FC = () => {
             sx= {{
                 minHeight: '100vh',
                 display: 'flex',
-                //flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
                 bgcolor: '#fff8bd',
-                //fontFamily: '"JetBrains Mono", monospace',
             }}
         >
-
             <Paper
                 elevation={6}
                 sx={{
@@ -108,8 +112,9 @@ const LoginPage: React.FC = () => {
                             '&:hover': { bgcolor: '#4a2d30' },
                         }}
                         onClick={handleLogin}
+                        startIcon={loading ? <CircularProgress size={20} /> : null}
                     >
-                        Log In
+                        {loading ? 'Loggin in...' : 'Log In'}
                     </Button>
                 </Stack>
                 <Typography 
