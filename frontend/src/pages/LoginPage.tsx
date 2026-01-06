@@ -1,9 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Stack, Link } from '@mui/material';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async () => {
+        setError('');
+        setLoading(true);
+
+        if (!email || !password) {
+            setError('All fields are required');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:3000/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || 'Login failed');
+                setLoading(false);
+                return;
+            }
+
+            localStorage.setItem('token', data.token);
+            navigate('/home');
+        } catch {
+            setError('Server error');
+            setLoading(false);
+        }
+    };
     
     return (
         <Box 
@@ -40,14 +78,25 @@ const LoginPage: React.FC = () => {
                         label='Email'
                         type='email'
                         fullWidth
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <TextField
                         label='Password'
                         type='password'
                         fullWidth
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
+                    {error && (
+                        <Typography color='error' fontSize='0.9rem'>
+                            {error}
+                        </Typography>
+                    )}
+
                     <Button
+                        disabled={loading}
                         variant='contained'
                         sx={{
                             mt: 2,
@@ -58,6 +107,7 @@ const LoginPage: React.FC = () => {
                             borderRadius: '10px',
                             '&:hover': { bgcolor: '#4a2d30' },
                         }}
+                        onClick={handleLogin}
                     >
                         Log In
                     </Button>

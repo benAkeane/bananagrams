@@ -9,11 +9,11 @@ const SignUpPage: React.FC = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleSignUp = async () => {
         setError("");
-        console.log("CLICKED");
-
+        setLoading(true);
         try {
             const res = await fetch('http://localhost:3000/auth/signup', {
                 method: 'POST',
@@ -27,14 +27,15 @@ const SignUpPage: React.FC = () => {
 
             if (!res.ok) {
                 setError(data.error || 'Sign up failed');
+                setLoading(false);
                 return;
             }
 
             localStorage.setItem('token', data.token);
-
             navigate('/home');
         } catch {
             setError('Server error');
+            setLoading(false);
         }
     };
     
@@ -106,6 +107,7 @@ const SignUpPage: React.FC = () => {
                             borderRadius: '10px',
                             '&:hover': { bgcolor: '#4a2d30' },
                         }}
+                        disabled={loading}
                         onClick={handleSignUp}
                     >
                         Sign Up
