@@ -1,3 +1,10 @@
+/**
+ * TODO: 
+ * Enforce first move in the center of the board
+ * Integrate with socket events (playTiles)
+ * Send placement payload to the frontend. {letter, x, y}
+ */
+
 import TilePool from './tilepool.js';
 import Player from './player.js';
 import { isWordValid } from '../services/dictionary.js';
@@ -39,52 +46,92 @@ export default class Game {
         return count <= 4 ? 14 : 10;
     }
 
-    async playWord(playerId: string, word: string): Promise<PlayResult> {
+    async playTiles(playerId: string, placements: { letter: string; x: number; y: number }[]): Promise<PlayResult> {
         const player = this.players[playerId];
         if (!player) {
             return { success: false, reason: 'player_not_found' };
         }
 
-        const word_upper = word.toUpperCase();
+        if (placements.length === 0) {
+            return { success: false, reason: 'no_tiles_placed' };
+        }
+        
+        // normalize letters
+        const letters = placements.map(p => p.letter.toUpperCase());
 
-        // check if word is in dictionary
-        const valid = await isWordValid(word_upper);
-        if (!valid) {
-            return { success: false, reason: 'invalid_word' };
+        // check if player has all tiles
+        if (!player.hasTiles(letters)) {
+            return { success: false, reason: 'not_enough_tiles' };
         }
 
-        // count needed tiles for a word
-        const needed: Record<string, number> = {};
-        for (const character of word_upper) {
-            needed[character!] = (needed[character!] || 0) + 1;
+        // TODO: adjacency and board rules
+
+        // assume placements are in valid positions for now
+        player.placeTiles(placements);
+
+        // extract all words formed (horizontal and vertical lines)
+        const words = this.extractWords(player, placements);
+        if (words.length === 0) {
+            // rollback players tiles
+            player.removeBoardTiles(placements);
+            return { success: false, reason: 'no_valid_words_formed' };
         }
 
-        // count players rack tiles
-        const rackCount: Record<string, number> = {};
-        for (const tile of player.rack) {
-            rackCount[tile] = (rackCount[tile] || 0) + 1;
-        }
-
-
-        // make sure player has enough tiles
-        for (const character in needed) {
-            if ((rackCount[character] || 0) < needed[character]!) {
-                return { success: false, reason: 'not_enough_tiles' };
+        // validate all words via dictionary
+        for (const word of words) {
+            const valid = await isWordValid(word);
+            if (!valid) {
+                player.removeBoardTiles(placements);
+                return { success: false, reason: `invalid_word: ${word}` };
             }
         }
 
-        // remove tiles from players rack
-        for (const character of word_upper) {
-            const index = player.rack.indexOf(character);
-            if (index !== -1) {
-                player.rack.splice(index, 1);
-            }
+        // commit move (remove tiles from rack)
+        if (!player.removeTiles(letters)) {
+            player.removeBoardTiles(placements);
+            return { success: false, reason: 'rack_mismatch' };
         }
 
-        // TODO: draw 1 tile (peel)
+        this.peel();
 
         return { success: true }
     }
+
+    // TODO: add logic for adjacency rules and overlapping tiles
+    extractWords(player: Player, placements: { x: number, y: number }[]): string[] {
+        const board = player.board;
+        const words: string[] = [];
+        const positions = placements.map(p => `${p.x},${p.y}`);
+
+        // check horizontal and vertical word for each tile placed
+        for (const pos of positions) {
+            const [x, y] = pos.split(',').map(Number);
+
+            // horizontal
+            let hWord = '';
+            let hx = x;
+            while (board[`${hx},${y}`]) {
+                hWord += board[`${hx},${y}`];
+                hx++;
+            }
+            if (hWord.length > 1) words.push(hWord);
+
+            // vertical
+            let vWord = '';
+            let vy = y;
+            while (board[`${x},${vy}`]) vy--;
+            vy++;
+            while (board[`${x},${vy}`]) {
+                vWord += board[`${x},${vy}`];
+                vy++;
+            }
+            if (vWord.length > 1) words.push(vWord);
+        }
+
+        // remove duplicates
+        return Array.from(new Set(words));
+    }
+
 
     // all players draw 1 tile
     peel(): void {
@@ -100,7 +147,9 @@ export default class Game {
     // exchange 1 tile for 3 new tiles
     dump(playerId: string, letter: string): PlayResult {
         const player = this.players[playerId];
-        if (!player) return { success: false, reason: 'player_not_found' };
+        if (!player) {
+            return { success: false, reason: 'player_not_found' };
+        }
 
         const letter_upper = letter.toUpperCase();
         const index = player.rack.indexOf(letter_upper);
@@ -129,5 +178,13 @@ export default class Game {
             })),
             poolSize: this.pool.tilesRemaining(),
         };
+    }
+
+    getPrivateState(playerId: string) {
+        const player = this.players[playerId];
+        if (!player) {
+            return null;
+        }
+        return player.getPrivateState();
     }
 }
