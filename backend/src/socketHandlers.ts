@@ -20,6 +20,7 @@ export const registerSocketHandlers = (io: Server) => {
         }
     };
 
+    // commented out for ease of development 
     // authenticate sockets with JWT
     io.use((socket, next) => {
         const token = socket.handshake.auth?.token;
@@ -40,10 +41,13 @@ export const registerSocketHandlers = (io: Server) => {
     io.on('connection', (socket: Socket) => {
         console.log('Client connected', socket.id);
 
+        socket.data.userId = socket.id;
+
         // listen for the client to join with a name
         socket.on('join', (name: string) => {
             const userId = socket.data.userId;
             game.addPlayer(userId, name);
+            socket.emit('privateState', game.getPrivateState(userId));
             updatePlayers();
         });
 

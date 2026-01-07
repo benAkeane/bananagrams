@@ -31,8 +31,13 @@ export default class Game {
 
     addPlayer(id: string, name: string) {
         if (this.players[id]) return;
+
         const player = new Player(id, name);
-        player.addTiles(this.pool.draw(this.getStartingTilesCount()));
+        const tiles = this.pool.draw(this.getStartingTilesCount());
+        player.addTiles(tiles);
+
+        console.log(`Player ${name} joined with rack:`, tiles);
+        
         this.players[id] = player;
     }
 
@@ -41,9 +46,9 @@ export default class Game {
     }
 
     getStartingTilesCount(): number {
-        const count = Object.keys(this.players).length;
+        const playerCount = Object.keys(this.players).length + 1;
         // 2-4 players: 14 tiles, 5+: 10
-        return count <= 4 ? 14 : 10;
+        return playerCount <= 4 ? 14 : 10;
     }
 
     async playTiles(playerId: string, placements: { letter: string; x: number; y: number }[]): Promise<PlayResult> {
